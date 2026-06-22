@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # INFRAESTRUCTURA (Bases de Datos, Colas de Mensajes)
+  # ---------------------------------------------------------------------------
+
+  # PostgreSQL (Motor unificado para todos los microservicios)
+  db:
+    image: postgres:15-alpine
+    container_name: corvus_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: corvus_auth_db # La primera BD se crea por defecto
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - corvus_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ (Broker de Mensajes para eventos asíncronos)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: corvus_rabbitmq
+    ports:
+      - "5672:5672"   # Puerto para comunicación de microservicios
+      - "15672:15672" # Interfaz gráfica de administración (http://localhost:15672)
+    environment:
+      RABBITMQ_DEFAULT_USER: corvus_admin
+      RABBITMQ_DEFAULT_PASS: corvus_secret
+    volumes:
+      - ../rabbitmq-config-corvus/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ../rabbitmq-config-corvus/definitions.json:/etc/rabbitmq/definitions.json
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - corvus_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # MICROSERVICIOS (Añadir conforme se vayan desarrollando)
+  # ---------------------------------------------------------------------------
+
+  # auth-service:
+  #   build: ../authentication-back-corvus
+  #   container_name: corvus_auth_service
+  #   ports:
+  #     - "3001:3000"
+  #   env_file:
+  #     - ../authentication-back-corvus/.env
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   networks:
+  #     - corvus_network
+
+networks:
+  corvus_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
