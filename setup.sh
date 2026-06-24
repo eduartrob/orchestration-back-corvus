@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # ==============================================================================
-# CORVUS PLATFORM - SCRIPT DE INSTALACIÓN MAESTRO
+# CORVUS PLATFORM - SCRIPT DE INSTALACIÓN MAESTRO v2.0
 # Descarga, clona, configura y despliega toda la plataforma Corvus.
+# Incluye fixes de producción: swap, permisos, limpieza de Docker cache.
 # ==============================================================================
 
 set -e
@@ -35,7 +36,21 @@ else
     echo "✅ Docker Compose ya está instalado."
 fi
 
-# 2. Crear estructura de carpetas y clonar repositorios
+# 2. Configurar Swap de 2GB para evitar OOM durante compilación de Docker
+if [ ! -f /swapfile ]; then
+    echo "💾 Configurando 2GB de Swap para compilación segura..."
+    sudo fallocate -l 2G /swapfile
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    # Persistir el swap entre reinicios
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+    echo "✅ Swap de 2GB configurado y persistido."
+else
+    echo "✅ Swap ya está configurado."
+fi
+
+# 3. Crear estructura de carpetas y clonar repositorios
 BASE_DIR="corvus-backend"
 echo "📁 Creando directorio base: $BASE_DIR"
 mkdir -p $BASE_DIR
@@ -60,7 +75,12 @@ for REPO in "${REPOS[@]}"; do
     fi
 done
 
-# 3. Solicitud Interactiva de Archivos .env
+# 4. Corregir permisos en caso de que un pull anterior se haya hecho con sudo
+echo "🔒 Verificando permisos de directorios..."
+sudo chown -R $USER:$USER .
+echo "✅ Permisos correctos."
+
+# 5. Solicitud Interactiva de Archivos .env
 echo "======================================================================"
 echo "🔐 CONFIGURACIÓN DE VARIABLES DE ENTORNO (.env)"
 echo "======================================================================"
@@ -72,15 +92,15 @@ prompt_env_file() {
     if [ -f "$env_file" ]; then
         echo "✅ El archivo $env_file ya existe. Omitiendo..."
     else
+        echo ""
         echo "⚠️  FALTA ARCHIVO: $env_file"
-        echo "Por favor, pega el contenido de tu archivo .env (asegúrate de copiarlo SIN líneas vacías en el medio)."
-        echo "Cuando termines, simplemente presiona ENTER (línea en blanco) para continuar:"
+        echo "Por favor, pega el contenido de tu archivo .env."
+        echo "Cuando termines, presiona ENTER en una línea vacía para continuar:"
+        echo ""
         
-        # Vaciar el archivo si existe
         > "$env_file"
         
         while IFS= read -r line; do
-            # Si el usuario manda una línea vacía (Enter), terminamos de capturar
             if [[ -z "$line" ]]; then
                 break
             fi
@@ -96,13 +116,26 @@ prompt_env_file "authentication-back-corvus"
 prompt_env_file "notifications-back-corvus"
 prompt_env_file "integratorProjectClustering-back-corvus"
 
-# 4. Levantar la infraestructura
+# 6. Limpiar caché vieja de Docker para liberar espacio antes de construir
+echo "🧹 Limpiando caché de Docker para garantizar espacio suficiente..."
+sudo docker system prune -af --filter "until=24h" 2>/dev/null || true
+echo "✅ Caché limpiada."
+
+# 7. Levantar la infraestructura con sudo (requerido para Docker socket)
 echo "🏗️ Construyendo y levantando los contenedores de Docker..."
 cd orchestration-back-corvus
-docker-compose up --build -d
+sudo docker-compose up --build -d
 
 echo "======================================================================"
 echo "🎉 INSTALACIÓN FINALIZADA CORRECTAMENTE 🎉"
-echo "Todos los servicios están corriendo en segundo plano."
-echo "Para ver logs, usa: cd corvus-backend/orchestration-back-corvus && docker-compose logs -f"
+echo ""
+echo "📡 Tu API está disponible en:"
+PUBLIC_IP=$(curl -s http://checkip.amazonaws.com 2>/dev/null || echo "<tu-ip-publica>")
+echo "   http://${PUBLIC_IP}:3000"
+echo ""
+echo "📋 Comandos útiles:"
+echo "   Ver logs:      sudo docker-compose logs -f"
+echo "   Ver servicios: sudo docker ps"
+echo "   Reiniciar:     sudo docker-compose restart"
+echo "   Detener:       sudo docker-compose down"
 echo "======================================================================"
