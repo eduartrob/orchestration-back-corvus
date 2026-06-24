@@ -73,14 +73,15 @@ prompt_env_file() {
         echo "✅ El archivo $env_file ya existe. Omitiendo..."
     else
         echo "⚠️  FALTA ARCHIVO: $env_file"
-        echo "Por favor, pega el contenido de tu archivo .env para este servicio."
-        echo "Cuando termines, presiona Enter, escribe 'EOF' y presiona Enter de nuevo:"
+        echo "Por favor, pega el contenido de tu archivo .env (asegúrate de copiarlo SIN líneas vacías en el medio)."
+        echo "Cuando termines, simplemente presiona ENTER (línea en blanco) para continuar:"
         
-        cat << 'EOF_MARKER' > "$env_file"
-EOF_MARKER
+        # Vaciar el archivo si existe
+        > "$env_file"
         
         while IFS= read -r line; do
-            if [[ "$line" == "EOF" ]]; then
+            # Si el usuario manda una línea vacía (Enter), terminamos de capturar
+            if [[ -z "$line" ]]; then
                 break
             fi
             echo "$line" >> "$env_file"
