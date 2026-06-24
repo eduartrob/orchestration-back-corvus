@@ -7,7 +7,8 @@ Este directorio contiene la configuración de Docker Compose y scripts para orqu
 Si es la primera vez que configuras el proyecto (o estás en un servidor EC2 limpio), ejecuta:
 
 ```bash
-wget https://raw.githubusercontent.com/eduartrob/orchestration-back-corvus/main/setup.sh
+git clone https://github.com/eduartrob/orchestration-back-corvus.git
+cd orchestration-back-corvus
 chmod +x setup.sh
 ./setup.sh
 ```
