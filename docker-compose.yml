@@ -78,6 +78,7 @@ services:
     env_file:
       - ../authentication-back-corvus/.env
     environment:
+      - PORT=3000
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
       - RABBITMQ_URL=amqp://corvus_admin:corvus_secret@rabbitmq:5672
     depends_on:
@@ -96,6 +97,7 @@ services:
     env_file:
       - ../notifications-back-corvus/.env
     environment:
+      - PORT=3001
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_notifications_db
       - RABBITMQ_URL=amqp://corvus_admin:corvus_secret@rabbitmq:5672
     depends_on:
