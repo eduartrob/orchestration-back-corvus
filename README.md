@@ -1,42 +1,82 @@
-# Orquestación y DevOps - Corvus Platform
+# Orchestration - Corvus Microservices
 
-Este repositorio es el centro de control de infraestructura de la plataforma Corvus. Contiene los archivos de configuración para levantar todos los servicios base mediante Docker.
+Este directorio contiene la configuración de Docker Compose y scripts para orquestar todos los microservicios de la plataforma Corvus.
 
-## Infraestructura Central
-* **PostgreSQL (v15):** Un contenedor único y centralizado que aloja las diferentes bases de datos lógicas (microservicios independientes).
-* **RabbitMQ (v3):** Message Broker para el manejo de eventos asíncronos y colas entre microservicios (Ej. notificaciones, correos).
-* **Microservicios:** API Gateway, Authentication, Notifications, Integrator Project Clustering (IA).
+## 🚀 Instalación Rápida (Primera Vez)
 
-## Inicialización Automática
-El script `/scripts/init-postgres.sql` se ejecuta automáticamente la primera vez que se levanta el contenedor de PostgreSQL para generar las bases de datos vacías requeridas.
+Si es la primera vez que configuras el proyecto (o estás en un servidor EC2 limpio), ejecuta:
+
+```bash
+wget https://raw.githubusercontent.com/eduartrob/orchestration-back-corvus/main/setup.sh
+chmod +x setup.sh
+./setup.sh
+```
+
+Este comando:
+1. Descarga el script de instalación maestro.
+2. Instala Docker y Docker-Compose si es necesario.
+3. Clona todos los repositorios de microservicios.
+4. Te pide configurar el `.env` de cada servicio interactivamente.
+5. Inicia toda la infraestructura.
 
 ---
 
-## 🚀 Despliegue Automatizado en AWS EC2
+## 🎯 Inicio Rápido (Ya Configurado)
 
-Para hacer el despliegue en un servidor de producción (como un EC2 de Ubuntu en AWS) hemos creado un script que instala las dependencias necesarias, pide interactivamente los secretos `.env` y levanta todos los contenedores con un solo comando.
+### Prerrequisitos
+- Docker y Docker Compose instalados en tu máquina.
 
-### Instrucciones de Despliegue
+### Iniciar Todos los Servicios
+Desde el directorio `orchestration-back-corvus`:
 
-1. Entra a tu instancia EC2 por SSH.
-2. Clona el repositorio de orquestación (y los microservicios si es necesario) y entra en la carpeta:
-   ```bash
-   git clone <URL_DEL_REPO> orchestration-back-corvus
-   cd orchestration-back-corvus
-   ```
-3. Otorga permisos de ejecución al script si aún no los tiene:
-   ```bash
-   chmod +x deploy-ec2.sh
-   ```
-4. Ejecuta el script de despliegue interactivo:
-   ```bash
-   ./deploy-ec2.sh
-   ```
-5. **Variables de Entorno (.env):** El script detectará si faltan archivos `.env` (ya que estos no se suben a Git por seguridad). Te pedirá interactivamente que pegues el contenido de tu `.env` para cada microservicio. 
-   - Pega tu texto.
-   - Presiona Enter.
-   - Escribe la palabra `EOF` y vuelve a presionar Enter.
-6. El orquestador descargará las imágenes y construirá todo. Al finalizar, la API estará viva y lista para recibir peticiones.
+```bash
+./scripts/start.sh
+```
+Este comando:
+- Construye las imágenes Docker de todos los servicios.
+- Inicia PostgreSQL, RabbitMQ, Gateway, Auth, Notifications y Clustering.
+- Los servicios quedan corriendo en segundo plano.
+
+### Detener Todos los Servicios
+```bash
+./scripts/stop.sh
+```
+
+---
+
+## 📋 Servicios Incluidos
+
+El `docker-compose.yml` orquesta los siguientes servicios bajo una red privada:
+- **PostgreSQL (`db`)**: Base de datos compartida.
+- **RabbitMQ (`rabbitmq`)**: Sistema de mensajería (Eventos asíncronos).
+- **Auth Service**: Autenticación y gestión de JWT.
+- **Gateway**: API Gateway (Único servicio expuesto al público).
+- **Notifications Service**: Envío de correos y OTPs.
+- **Clustering Integrator**: Motor IA en Python para análisis de Océanos Azules.
+
+---
+
+## 🔧 Comandos Útiles
+
+**Ver el estado de los servicios:**
+```bash
+docker-compose ps
+```
+
+**Ver logs de todos los servicios:**
+```bash
+docker-compose logs -f
+```
+
+**Ver logs de un servicio específico:**
+```bash
+docker-compose logs -f api-gateway
+```
+
+**Reconstruir un servicio específico tras un cambio en el código:**
+```bash
+docker-compose up -d --build auth-service
+```
 
 ---
 
@@ -46,6 +86,5 @@ Por diseño de arquitectura, los microservicios están blindados y no se exponen
 
 **El ÚNICO puerto que debes abrir en las reglas de entrada (Inbound Rules) de tu Security Group en AWS EC2 es:**
 - **Puerto 3000 (TCP):** Para el `api-gateway`, que es el único que gestionará el tráfico hacia la aplicación móvil.
-- *(Y el puerto 22 para SSH, por supuesto).*
 
-Cualquier petición que la aplicación móvil necesite hacer a Auth, Notificaciones o IA, lo hará golpeando la IP Elástica de EC2 por el puerto 3000 (Ej: `http://3.15.22.40:3000/api/v1/auth/login`).
+Cualquier petición que la aplicación móvil necesite hacer lo hará golpeando la IP Elástica de EC2 por el puerto 3000 (Ej: `http://3.15.22.40:3000/api/v1/auth/login`).
