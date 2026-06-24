@@ -126,6 +126,14 @@ echo "🏗️ Construyendo y levantando los contenedores de Docker..."
 cd orchestration-back-corvus
 sudo docker-compose up --build -d
 
+# 8. Sincronizar esquemas de base de datos (Prisma)
+echo "🗄️ Esperando a que las bases de datos estén listas para sincronizar esquemas (10s)..."
+sleep 10
+echo "🔄 Sincronizando esquema de Autenticación..."
+sudo docker exec corvus_auth_service npx prisma db push --accept-data-loss || echo "⚠️ Advertencia: No se pudo sincronizar Auth DB automáticamente."
+echo "🔄 Sincronizando esquema de Notificaciones..."
+sudo docker exec corvus_notifications_service npx prisma db push --accept-data-loss || echo "⚠️ Advertencia: No se pudo sincronizar Notifications DB automáticamente."
+
 echo "======================================================================"
 echo "🎉 INSTALACIÓN FINALIZADA CORRECTAMENTE 🎉"
 echo ""
