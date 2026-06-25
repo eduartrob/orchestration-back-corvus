@@ -122,6 +122,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - chroma_data_vol:/usr/src/app/chroma_data
+      - ml_models_vol:/usr/src/app/app/models
     networks:
       - corvus_network
 
@@ -132,3 +135,5 @@ networks:
 volumes:
   postgres_data:
   rabbitmq_data:
+  chroma_data_vol:
+  ml_models_vol:
