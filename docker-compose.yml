@@ -118,9 +118,13 @@ services:
     environment:
       - POSTGRES_DB_URL=postgresql://postgres:postgres@db:5432/corvus_clustering_integrator_db
       - PORT=3002
+      - AUTH_SERVICE_URL=http://auth-service:3000
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - chroma_data_vol:/usr/src/app/chroma_data
+      - ml_models_vol:/usr/src/app/app/models
     networks:
       - corvus_network
 
@@ -131,3 +135,5 @@ networks:
 volumes:
   postgres_data:
   rabbitmq_data:
+  chroma_data_vol:
+  ml_models_vol:
