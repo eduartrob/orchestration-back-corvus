@@ -63,10 +63,12 @@ services:
       - AUTH_URL=http://auth-service:3000
       - NOTIFICATIONS_URL=http://notifications-service:3001
       - CLUSTERING_INTEGRATOR_URL=http://clustering-integrator-service:3002
+      - LLM_URL=http://llm-service:3003
     depends_on:
       - auth-service
       - notifications-service
       - clustering-integrator-service
+      - llm-service
     networks:
       - corvus_network
 
@@ -128,6 +130,28 @@ services:
     networks:
       - corvus_network
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: corvus_ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - corvus_network
+
+  llm-service:
+    build: ../llm-back-corvus
+    container_name: corvus_llm_service
+    expose:
+      - "3003"
+    env_file:
+      - ../llm-back-corvus/.env
+    depends_on:
+      - ollama
+      - auth-service
+    networks:
+      - corvus_network
+
 networks:
   corvus_network:
     driver: bridge
@@ -137,3 +161,4 @@ volumes:
   rabbitmq_data:
   chroma_data_vol:
   ml_models_vol:
+  ollama_data:
