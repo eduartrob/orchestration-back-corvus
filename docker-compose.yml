@@ -9,6 +9,7 @@ services:
   db:
     image: postgres:15-alpine
     container_name: corvus_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -30,6 +31,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: corvus_rabbitmq
+    restart: unless-stopped
     ports:
       - "5672:5672"   # Puerto AMQP
       - "15672:15672" # Management UI
@@ -55,6 +57,7 @@ services:
   api-gateway:
     build: ../apiGateway-back-corvus
     container_name: corvus_api_gateway
+    restart: unless-stopped
     ports:
       - "3000:3000" # ÚNICO PUERTO EXPUESTO PARA EL FRONTEND/MÓVIL
     env_file:
@@ -75,6 +78,7 @@ services:
   auth-service:
     build: ../authentication-back-corvus
     container_name: corvus_auth_service
+    restart: unless-stopped
     expose:
       - "3000" # Comunicación interna, NO ports: - "3001:3000"
     env_file:
@@ -94,6 +98,7 @@ services:
   notifications-service:
     build: ../notifications-back-corvus
     container_name: corvus_notifications_service
+    restart: unless-stopped
     expose:
       - "3001"
     env_file:
@@ -113,6 +118,7 @@ services:
   clustering-integrator-service:
     build: ../integratorProjectClustering-back-corvus
     container_name: corvus_clustering_integrator
+    restart: unless-stopped
     expose:
       - "3002"
     env_file:
@@ -142,6 +148,7 @@ services:
   llm-service:
     build: ../llm-back-corvus
     container_name: corvus_llm_service
+    restart: unless-stopped
     expose:
       - "3003"
     env_file:
@@ -149,6 +156,18 @@ services:
     depends_on:
       - ollama
       - auth-service
+    networks:
+      - corvus_network
+
+  admin-frontend:
+    build: ../administration-front-corvus
+    container_name: corvus_admin_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api-gateway
     networks:
       - corvus_network
 
