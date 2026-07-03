@@ -133,6 +133,9 @@ services:
     volumes:
       - chroma_data_vol:/usr/src/app/chroma_data
       - ml_models_vol:/usr/src/app/app/models
+      - qdrant_data_vol:/usr/src/app/qdrant_data
+      - pending_projects_vol:/usr/src/app/app/pending_projects
+      - clustering_config_vol:/usr/src/app/app/config
     networks:
       - corvus_network
 
@@ -180,4 +183,7 @@ volumes:
   rabbitmq_data:
   chroma_data_vol:
   ml_models_vol:
+  qdrant_data_vol:
+  pending_projects_vol:
+  clustering_config_vol:
   ollama_data:
