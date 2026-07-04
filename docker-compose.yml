@@ -59,7 +59,9 @@ services:
     container_name: corvus_api_gateway
     restart: unless-stopped
     ports:
-      - "3000:3000" # ÚNICO PUERTO EXPUESTO PARA EL FRONTEND/MÓVIL
+      - "3000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # ÚNICO PUERTO EXPUESTO PARA EL FRONTEND/MÓVIL
     env_file:
       - ../apiGateway-back-corvus/.env
     environment:
