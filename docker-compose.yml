@@ -59,7 +59,9 @@ services:
     container_name: corvus_api_gateway
     restart: unless-stopped
     ports:
-      - "3000:3000" # ÚNICO PUERTO EXPUESTO PARA EL FRONTEND/MÓVIL
+      - "3000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # ÚNICO PUERTO EXPUESTO PARA EL FRONTEND/MÓVIL
     env_file:
       - ../apiGateway-back-corvus/.env
     environment:
@@ -136,6 +138,7 @@ services:
       - qdrant_data_vol:/usr/src/app/qdrant_data
       - pending_projects_vol:/usr/src/app/app/pending_projects
       - clustering_config_vol:/usr/src/app/app/config
+      - drafts_vol:/usr/src/app/app/drafts
     networks:
       - corvus_network
 
@@ -188,4 +191,5 @@ volumes:
   qdrant_data_vol:
   pending_projects_vol:
   clustering_config_vol:
+  drafts_vol:
   ollama_data:
