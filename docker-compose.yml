@@ -68,11 +68,13 @@ services:
       - AUTH_URL=http://auth-service:3000
       - NOTIFICATIONS_URL=http://notifications-service:3001
       - CLUSTERING_INTEGRATOR_URL=http://clustering-integrator-service:3002
+      - CLUSTERING_SUBJECT_URL=http://clustering-subject-service:3005
       - LLM_URL=http://llm-service:3003
     depends_on:
       - auth-service
       - notifications-service
       - clustering-integrator-service
+      - clustering-subject-service
       - llm-service
     networks:
       - corvus_network
@@ -139,6 +141,24 @@ services:
       - pending_projects_vol:/usr/src/app/app/pending_projects
       - clustering_config_vol:/usr/src/app/app/config
       - drafts_vol:/usr/src/app/app/drafts
+    networks:
+      - corvus_network
+
+  clustering-subject-service:
+    build: ../subjectMatterClustering-back-corvus
+    container_name: corvus_clustering_subject
+    restart: unless-stopped
+    expose:
+      - "3005"
+    env_file:
+      - ../subjectMatterClustering-back-corvus/.env
+    environment:
+      - PORT=3005
+      - LLM_SERVICE_URL=http://llm-service:3003/api/v1/llm
+    depends_on:
+      - llm-service
+    volumes:
+      - chroma_data_vol:/usr/src/app/chroma_db
     networks:
       - corvus_network
 
