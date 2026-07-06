@@ -150,8 +150,6 @@ services:
     restart: unless-stopped
     expose:
       - "3005"
-    env_file:
-      - ../subjectMatterClustering-back-corvus/.env
     environment:
       - PORT=3005
       - LLM_SERVICE_URL=http://llm-service:3003/api/v1/llm
