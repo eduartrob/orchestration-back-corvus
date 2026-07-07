@@ -172,7 +172,7 @@ services:
       - PORT=3006
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
       - DEV_BYPASS=false
-      - JWT_SECRET=super_secret_key_change_in_production
+      - JWT_SECRET=patoSumergido-azulacion-modularitimamente_23#2choquito
       - JWT_ALGORITHM=HS256
       - LLM_URL=http://llm-service:3003
     depends_on:
