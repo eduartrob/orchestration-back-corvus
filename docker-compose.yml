@@ -69,7 +69,7 @@ services:
       - NOTIFICATIONS_URL=http://notifications-service:3001
       - CLUSTERING_INTEGRATOR_URL=http://clustering-integrator-service:3002
       - CLUSTERING_SUBJECT_URL=http://clustering-subject-service:3005
-      - CLUSTERING_STUDENTS_GROUPS_URL=http://clustering-students-service:3006
+      - CLUSTERING_STUDENTS_GROUPS_URL=http://clustering-students-service:8000
       - LLM_URL=http://llm-service:3003
     depends_on:
       - auth-service
@@ -167,7 +167,7 @@ services:
     container_name: corvus_clustering_students
     restart: unless-stopped
     expose:
-      - "3006"
+      - "8000"
     environment:
       - PORT=3006
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
