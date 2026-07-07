@@ -168,6 +168,8 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
+    env_file:
+      - ../authentication-back-corvus/.env
     environment:
       - PORT=3006
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
