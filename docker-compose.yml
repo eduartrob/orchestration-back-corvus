@@ -69,12 +69,14 @@ services:
       - NOTIFICATIONS_URL=http://notifications-service:3001
       - CLUSTERING_INTEGRATOR_URL=http://clustering-integrator-service:3002
       - CLUSTERING_SUBJECT_URL=http://clustering-subject-service:3005
+      - CLUSTERING_STUDENTS_GROUPS_URL=http://clustering-students-service:3006
       - LLM_URL=http://llm-service:3003
     depends_on:
       - auth-service
       - notifications-service
       - clustering-integrator-service
       - clustering-subject-service
+      - clustering-students-service
       - llm-service
     networks:
       - corvus_network
@@ -157,6 +159,25 @@ services:
       - llm-service
     volumes:
       - chroma_data_vol:/usr/src/app/chroma_db
+    networks:
+      - corvus_network
+
+  clustering-students-service:
+    build: ../studentsGroupsClustering-corvus
+    container_name: corvus_clustering_students
+    restart: unless-stopped
+    expose:
+      - "3006"
+    environment:
+      - PORT=3006
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
+      - DEV_BYPASS=false
+      - JWT_SECRET=super_secret_key_change_in_production
+      - JWT_ALGORITHM=HS256
+      - LLM_URL=http://llm-service:3003
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - corvus_network
 
