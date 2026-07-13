@@ -159,6 +159,7 @@ services:
       - llm-service
     volumes:
       - chroma_data_vol:/usr/src/app/chroma_db
+      - subject_qdrant_vol:/usr/src/app/qdrant_data
     networks:
       - corvus_network
 
@@ -230,6 +231,7 @@ volumes:
   chroma_data_vol:
   ml_models_vol:
   qdrant_data_vol:
+  subject_qdrant_vol:
   pending_projects_vol:
   clustering_config_vol:
   drafts_vol:
