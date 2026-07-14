@@ -70,7 +70,6 @@ services:
       - CLUSTERING_INTEGRATOR_URL=http://clustering-integrator-service:3002
       - CLUSTERING_SUBJECT_URL=http://clustering-subject-service:3005
       - CLUSTERING_STUDENTS_GROUPS_URL=http://clustering-students-service:8000
-      - CLUSTERING_STUDENTS_INFO_URL=http://clustering-students-service:8000
       - LLM_URL=http://llm-service:3003
     depends_on:
       - auth-service
@@ -160,6 +159,7 @@ services:
       - llm-service
     volumes:
       - chroma_data_vol:/usr/src/app/chroma_db
+      - subject_qdrant_vol:/usr/src/app/qdrant_data
     networks:
       - corvus_network
 
@@ -168,7 +168,9 @@ services:
     container_name: corvus_clustering_students
     restart: unless-stopped
     expose:
-      - "3006"
+      - "8000"
+    env_file:
+      - ../authentication-back-corvus/.env
     environment:
       - PORT=3006
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
@@ -229,6 +231,7 @@ volumes:
   chroma_data_vol:
   ml_models_vol:
   qdrant_data_vol:
+  subject_qdrant_vol:
   pending_projects_vol:
   clustering_config_vol:
   drafts_vol:
