@@ -93,6 +93,7 @@ services:
       - PORT=3000
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
       - RABBITMQ_URL=amqp://corvus_admin:corvus_secret@rabbitmq:5672
+      - LLM_URL=http://llm-service:3003
     depends_on:
       db:
         condition: service_healthy
