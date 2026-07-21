@@ -71,7 +71,6 @@ services:
       - CLUSTERING_SUBJECT_URL=http://clustering-subject-service:3005
       - CLUSTERING_STUDENTS_GROUPS_URL=http://clustering-students-service:8000
       - LLM_URL=http://llm-service:3003
-      - PAYMENTS_URL=http://payments-service:8001
     depends_on:
       - auth-service
       - notifications-service
@@ -79,7 +78,6 @@ services:
       - clustering-subject-service
       - clustering-students-service
       - llm-service
-      - payments-service
     networks:
       - corvus_network
 
@@ -95,7 +93,6 @@ services:
       - PORT=3000
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
       - RABBITMQ_URL=amqp://corvus_admin:corvus_secret@rabbitmq:5672
-      - LLM_URL=http://llm-service:3003
     depends_on:
       db:
         condition: service_healthy
@@ -207,21 +204,6 @@ services:
     depends_on:
       - ollama
       - auth-service
-    networks:
-      - corvus_network
-
-  payments-service:
-    build: ../payments-back-corvus
-    container_name: corvus_payments_service
-    restart: unless-stopped
-    expose:
-      - "8001"
-    environment:
-      - PORT=8001
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/corvus_auth_db
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - corvus_network
 
